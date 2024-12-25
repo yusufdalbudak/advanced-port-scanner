@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Port Scanner - Network Security Tool</title>
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary mb-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div>Scanning ports... This may take a few minutes.</div>
+        </div>
+    </div>
+
+    <header class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <i class="fas fa-network-wired fa-3x me-3"></i>
+                </div>
+                <div class="col">
+                    <h1>Port Scanner</h1>
+                    <p class="mb-0">Scan and analyze network ports with advanced features</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <form id="scanForm" action="/scan" method="POST">
+                            <div class="mb-4">
+                                <label for="ip" class="form-label">
+                                    <i class="fas fa-globe me-2"></i>IP Address
+                                </label>
+                                <input type="text" class="form-control" id="ip" name="ip" 
+                                       placeholder="e.g., 192.168.1.1" required>
+                                <div class="form-text">Enter the IP address to scan</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-plug me-2"></i>Port Selection
+                                </label>
+                                <div class="port-options">
+                                    <div class="port-option">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="portOption" id="commonPorts" value="common" checked>
+                                            <label class="form-check-label" for="commonPorts">
+                                                <i class="fas fa-star me-2"></i>Common Ports
+                                                <small class="d-block text-muted ms-4">20-23, 25, 53, 80, 110, 143, 443, 465, 587, 993, 995, 3306, 3389, 5432, 8080</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="port-option">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="portOption" id="wellKnownPorts" value="wellknown">
+                                            <label class="form-check-label" for="wellKnownPorts">
+                                                <i class="fas fa-shield-alt me-2"></i>Well-Known Ports
+                                                <small class="d-block text-muted ms-4">Ports 1-1024</small>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="port-option">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="portOption" id="customRange" value="custom">
+                                            <label class="form-check-label" for="customRange">
+                                                <i class="fas fa-sliders-h me-2"></i>Custom Port Range
+                                            </label>
+                                        </div>
+                                        <div class="row mt-2" id="customRangeInputs" style="display: none;">
+                                            <div class="col-md-6">
+                                                <input type="number" class="form-control" id="startPort" name="startPort" 
+                                                       placeholder="Start Port" min="1" max="65535">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input type="number" class="form-control" id="endPort" name="endPort" 
+                                                       placeholder="End Port" min="1" max="65535">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="port-option">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="portOption" id="specificPorts" value="specific">
+                                            <label class="form-check-label" for="specificPorts">
+                                                <i class="fas fa-list-ol me-2"></i>Specific Ports
+                                            </label>
+                                        </div>
+                                        <div class="mt-2" id="specificPortsInput" style="display: none;">
+                                            <input type="text" class="form-control" id="portList" name="portList" 
+                                                   placeholder="Enter ports separated by commas (e.g., 80,443,3306)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="scan-tips alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Scanning Tips:</h6>
+                                <ul class="mb-0">
+                                    <li><i class="fas fa-check me-2"></i>Common ports option includes most frequently used service ports</li>
+                                    <li><i class="fas fa-check me-2"></i>Well-known ports (1-1024) are typically used by system services</li>
+                                    <li><i class="fas fa-check me-2"></i>Custom range allows you to specify a specific port range</li>
+                                    <li><i class="fas fa-check me-2"></i>Specific ports option lets you scan only the ports you're interested in</li>
+                                </ul>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="scanButton">
+                                <i class="fas fa-search me-2"></i>Start Scan
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {{if .Results}}
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-clipboard-list me-2"></i>Scan Results</span>
+                        <button class="btn btn-secondary" onclick="copyResults()">
+                            <i class="fas fa-copy me-2"></i>Copy Results
+                        </button>
+                    </div>
+                    <div class="card-body result-box" id="resultsBox">
+                        {{.Results}}
+                    </div>
+                </div>
+                {{end}}
+
+                {{if .Error}}
+                <div class="alert alert-danger mt-4">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Error:</strong> {{.Error}}
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/script.js"></script>
+</body>
+</html> 

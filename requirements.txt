@@ -1,0 +1,18 @@
+# Web Framework
+Flask==2.0.1
+Werkzeug==2.0.1
+
+# Networking
+requests==2.26.0
+
+# Async Support
+aiohttp==3.8.1
+asyncio==3.4.3
+
+# Security
+python-dotenv==0.19.0
+cryptography==3.4.7
+
+# Utilities
+tqdm==4.62.2  # For progress bars
+colorama==0.4.4  # For colored terminal output 
