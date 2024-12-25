@@ -31,7 +31,7 @@ A modern and user-friendly web-based port scanning tool. This application is a p
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yusufdalbudak/port-scanner.git
+git clone https://github.com/yusufdalbudak/advanced-port-scanner.git
 cd port-scanner
 ```
 
